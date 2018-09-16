@@ -1,0 +1,83 @@
+BootStrap: docker
+From: nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+
+%environment
+    # cuda path
+    PATH=/opt/anaconda/bin:/usr/local/nvidia:$PATH
+    # LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/nvidia:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    # LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/lib64/nvidia:$LD_LIBRARY_PATH
+    
+    # oracle path
+    # PATH=/opt/oracle/instantclient_12_2:$PATH
+    # LD_LIBRARY_PATH=/opt/oracle/instantclient_12_2:$LD_LIBRARY_PATH
+
+%post
+    #### path
+    # export LC_ALL=C
+    # export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    
+    #### add universe repo and install some packages
+    # sed -i '/xenial.*universe/s/^#//g' /etc/apt/sources.list
+    apt-get -y update
+    apt-get clean
+    
+    #### packages
+    apt-get -y install build-essential apt-utils wget
+    apt-get -y install gdebi-core
+    apt-get -y install libapparmor1
+
+    apt-get update
+    apt-get -y install git cmake g++ vim unzip
+    apt-get -y install tmux tree
+    # apt-get -y install python3-pip
+    # apt-get -y install npm nodejs-legacy
+    apt-get -y install locales
+    apt-get -y install alien
+    apt-get -y install libaio1
+    # apt-get -y install software-properties-common python-software-properties
+    # apt-get -y install libopencv-dev python-opencv
+    # apt-get -y install default-jdk
+    
+    # locale-gen en_US en_US.UTF-8
+    # DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
+    
+    #### git lfs
+    wget --quiet https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh
+    bash script.deb.sh
+    apt-get -y install git-lfs
+    
+    #### anaconda
+    wdir=$(pwd)
+    wget --quiet https://repo.continuum.io/archive/Anaconda3-5.2.0-Linux-x86_64.sh -O ${wdir}/anaconda.sh
+    bash anaconda.sh -b -p /opt/anaconda
+    rm anaconda.sh
+    
+    export PATH="/opt/anaconda/bin:$PATH"
+    
+    apt-get -y install libcupti-dev
+    pip install --no-cache-dir --upgrade tensorflow-gpu
+    pip install --no-cache-dir --upgrade keras
+    pip install --no-cache-dir --upgrade python-dotenv
+    pip install --no-cache-dir --upgrade pydicom
+    pip install --no-cache-dir --upgrade gensim
+    # python -m nltk.downloader -d /usr/local/share/nltk_data all
+    # conda install -c anaconda cx_oracle
+    # conda install -c r r-essentials rpy2
+    # conda update conda -y
+    # conda update anaconda -y
+    # conda update jupyter_core jupyter_client -y
+    # conda update sqlalchemy -y
+    # conda update nltk -y
+    # pip install --no-cache-dir --upgrade SimpleITK
+    # pip install --no-cache-dir --upgrade nibabel
+    # pip install --no-cache-dir --upgrade mpld3
+    # pip install --no-cache-dir --upgrade jupyterhub
+    # pip install --no-cache-dir --upgrade jupyterhub-dummyauthenticator
+    
+    # Clean up
+    apt-get clean
+    apt-get -y autoremove
+    rm -rvf /var/lib/apt/lists/*
+
+%runscript
+    exec /bin/bash
